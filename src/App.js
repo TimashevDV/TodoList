@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './app.module.css';
 import { useEffect } from 'react';
+import { useAddNewTodo, useDeleteTodo } from './hooks';
 
 export const App = () => {
 	const [todoList, setTodoList] = useState([]);
@@ -17,52 +18,24 @@ export const App = () => {
 	const refreshTodo = () =>
 		setRefreshTodoFlag(!refreshTodoFlag);
 
-	useEffect(
-		(filter) => {
-			fetch('http://localhost:3005/todoList')
-				.then((loadedTodos) => loadedTodos.json())
-				.then((loadedTodo) => {
-					setTodoList(loadedTodo);
-					setSorted(loadedTodo);
-					console.log(loadedTodo);
-				})
-				.catch((error) => console.log(error));
-		},
-		[refreshTodoFlag],
+	const { addNewTodo } = useAddNewTodo(
+		refreshTodo,
+		value,
+		setValue,
 	);
 
-	const addNewTodo = () => {
-		fetch('http://localhost:3005/todoList', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json;charset=utf-8',
-			},
-			body: JSON.stringify({
-				todo: value,
-				isCompleted: false,
-			}),
-		})
-			.then((rawResponse) => rawResponse.json())
-			.then((response) => {
-				console.log(response);
-				refreshTodo();
-			})
-			.catch((error) => console.log(error))
-			.finally(setValue(''));
-	};
+	const { deleteTodo } = useDeleteTodo(refreshTodo);
 
-	const deleteTodo = (id) => {
-		fetch(`http://localhost:3005/todoList/${id}`, {
-			method: 'DELETE',
-		})
-			.then((rawResponse) => rawResponse.json())
-			.then((response) => {
-				console.log(response);
-				refreshTodo();
+	useEffect(() => {
+		fetch('http://localhost:3005/todoList')
+			.then((loadedTodos) => loadedTodos.json())
+			.then((loadedTodo) => {
+				setTodoList(loadedTodo);
+				setSorted(loadedTodo);
+				console.log(loadedTodo);
 			})
-			.catch((error) => console.log(error))
-			.finally();
-	};
+			.catch((error) => console.log(error));
+	}, [refreshTodoFlag]);
 
 	const updateTodo = (todo, id) => {
 		setValue(todo);
@@ -115,8 +88,6 @@ export const App = () => {
 		}
 	};
 
-	// setSorted(todoList);
-
 	const buttonSorting = () => {
 		let sortetTodo = [...todoList];
 		sortetTodo.sort((a, b) => {
@@ -133,44 +104,63 @@ export const App = () => {
 
 	return (
 		<div className={styles.app}>
-			<h1>Список дел</h1>
+			<h1 className={styles.todoTitle}>Список дел</h1>
+			<div className={styles.todoNew}>
+				<input
+					placeholder="Новая задача..."
+					className={styles.input}
+					type="text"
+					value={value}
+					onChange={({ target }) =>
+						setValue(target.value)
+					}
+				></input>
 
-			<input
-				className={styles.input}
-				type="text"
-				value={value}
-				onChange={({ target }) => setValue(target.value)}
-			></input>
-
-			<button
-				className={styles.btnAdd}
-				onClick={buttonUpdate}
-			>
-				{buttonAddAndUpdate}
-			</button>
+				<button
+					className={styles.btnAdd}
+					onClick={buttonUpdate}
+				>
+					{buttonAddAndUpdate}
+				</button>
+			</div>
 			<button
 				className={styles.btnSorting}
 				onClick={buttonSorting}
 			>
 				Сортировка по алфавиту
 			</button>
-			{sorted.map(({ id, todo }) => (
-				<li key={id} className={styles.todoList}>
-					{todo}
-					<button
-						className={styles.btnDelete}
-						onClick={() => deleteTodo(id)}
-					>
-						X
-					</button>
-					<button
-						className={styles.btnChange}
-						onClick={() => updateTodo(todo, id)}
-					>
-						C
-					</button>
-				</li>
-			))}
+			<div className={styles.todoList}>
+				{sorted.map(({ id, todo }) => (
+					<div key={id} className={styles.todoTask}>
+						<li
+							key={id}
+							className={styles.todoTaskText}
+						>
+							<input
+								key={id}
+								className={styles.todoCheckBox}
+								type="checkbox"
+							/>
+							{todo}
+
+							<button
+								className={styles.btnDelete}
+								onClick={() => deleteTodo(id)}
+							>
+								X
+							</button>
+							<button
+								className={styles.btnChange}
+								onClick={() =>
+									updateTodo(todo, id)
+								}
+							>
+								R
+							</button>
+						</li>
+					</div>
+				))}
+			</div>
 			<form id="search">
 				<input
 					className={styles.search}

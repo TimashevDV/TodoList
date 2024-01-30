@@ -2,9 +2,11 @@ import { useState } from 'react';
 import styles from './app.module.css';
 import { useEffect } from 'react';
 import { useAddNewTodo, useDeleteTodo } from './hooks';
+import { ref, onValue, set } from 'firebase/database';
+import { db } from './firebase';
 
 export const App = () => {
-	const [todoList, setTodoList] = useState([]);
+	const [todoList, setTodoList] = useState({});
 	const [value, setValue] = useState('');
 	const [refreshTodoFlag, setRefreshTodoFlag] =
 		useState(false);
@@ -27,15 +29,15 @@ export const App = () => {
 	const { deleteTodo } = useDeleteTodo(refreshTodo);
 
 	useEffect(() => {
-		fetch('http://localhost:3005/todoList')
-			.then((loadedTodos) => loadedTodos.json())
-			.then((loadedTodo) => {
-				setTodoList(loadedTodo);
-				setSorted(loadedTodo);
-				console.log(loadedTodo);
-			})
-			.catch((error) => console.log(error));
-	}, [refreshTodoFlag]);
+		const todoListDbRef = ref(db, 'TodoList');
+
+		return onValue(todoListDbRef, (snapshot) => {
+			const loadedTodoList = snapshot.val() || [];
+			setTodoList(loadedTodoList);
+			setSorted(Object.entries(loadedTodoList));
+			console.log(loadedTodoList);
+		});
+	}, []);
 
 	const updateTodo = (todo, id) => {
 		setValue(todo);
@@ -45,17 +47,12 @@ export const App = () => {
 	};
 
 	const updateTodoInServer = () => {
-		fetch(`http://localhost:3005/todoList/${byId}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json;charset=utf-8',
-			},
-			body: JSON.stringify({
-				todo: value,
-				isCompleted: false,
-			}),
+		const updeteTodoDbRef = ref(db, `TodoList/${byId}`);
+
+		set(updeteTodoDbRef, {
+			todo: value,
+			isCompleted: false,
 		})
-			.then((rawResponse) => rawResponse.json())
 			.then((response) => {
 				console.log(response);
 				refreshTodo();
@@ -77,11 +74,11 @@ export const App = () => {
 
 	const searchTodo = (e) => {
 		e.preventDefault();
-		const searchTodoList = todoList.filter((item) => {
-			return item.todo
-				.toLowerCase()
-				.includes(String(searchValue).toLowerCase());
-		});
+		const searchTodoList = Object.entries(todoList).filter(
+			([index, item]) => {
+				return item.todo.includes(String(searchValue));
+			},
+		);
 		console.log(searchTodoList);
 		if (searchTodoList) {
 			return setResultSearch(searchTodoList);
@@ -89,16 +86,15 @@ export const App = () => {
 	};
 
 	const buttonSorting = () => {
-		let sortetTodo = [...todoList];
-		sortetTodo.sort((a, b) => {
-			if (a.todo.toLowerCase() < b.todo.toLowerCase()) {
-				return -1;
-			}
-			if (a.todo.toLowerCase() > b.todo.toLowerCase()) {
-				return 1;
-			}
-			return 0;
-		});
+		let isSort = true;
+		const arrayTodo = Object.entries(todoList);
+
+		const sortetTodo = isSort
+			? arrayTodo.sort((a, b) => {
+					return a[0].todo > b[0].todo ? 1 : -1;
+				})
+			: arrayTodo;
+
 		setSorted(sortetTodo);
 	};
 
@@ -130,7 +126,7 @@ export const App = () => {
 				Сортировка по алфавиту
 			</button>
 			<div className={styles.todoList}>
-				{sorted.map(({ id, todo }) => (
+				{sorted.map(([id, { todo }]) => (
 					<div key={id} className={styles.todoTask}>
 						<li
 							key={id}
@@ -178,7 +174,7 @@ export const App = () => {
 				>
 					Поиск
 				</button>
-				{resultSearch.map(({ id, todo }) => (
+				{resultSearch.map(([id, { todo }]) => (
 					<li className={styles.todoList} key={id}>
 						{todo}
 					</li>

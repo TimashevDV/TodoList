@@ -1,16 +1,14 @@
+import { ref, push } from 'firebase/database';
+import { db } from '../firebase';
+
 export const useAddNewTodo = (refreshTodo, value, setValue) => {
 	const addNewTodo = () => {
-		fetch('http://localhost:3005/todoList', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json;charset=utf-8',
-			},
-			body: JSON.stringify({
-				todo: value,
-				isCompleted: false,
-			}),
+		const todoListDbRef = ref(db, 'TodoList');
+
+		push(todoListDbRef, {
+			todo: value,
+			isComplited: false,
 		})
-			.then((rawResponse) => rawResponse.json())
 			.then((response) => {
 				console.log(response);
 				refreshTodo();

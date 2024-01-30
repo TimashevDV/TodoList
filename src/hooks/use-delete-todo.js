@@ -1,9 +1,10 @@
+import { ref, remove } from 'firebase/database';
+import { db } from '../firebase';
+
 export const useDeleteTodo = (refreshTodo) => {
 	const deleteTodo = (id) => {
-		fetch(`http://localhost:3005/todoList/${id}`, {
-			method: 'DELETE',
-		})
-			.then((rawResponse) => rawResponse.json())
+		const delTodoDbRef = ref(db, `TodoList/${id}`);
+		remove(delTodoDbRef)
 			.then((response) => {
 				console.log(response);
 				refreshTodo();

@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
+    "firebase": "^10.7.2",
     "prettier": "^3.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -24,11 +25,11 @@
     "extends": [
       "react-app",
       "react-app/jest",
-	  "prettier"
+      "prettier"
     ],
-	"plugins": [
-		"prettier"
-	]
+    "plugins": [
+      "prettier"
+    ]
   },
   "browserslist": {
     "production": [

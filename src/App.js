@@ -2,6 +2,8 @@ import { useState } from 'react';
 import styles from './app.module.css';
 import { useEffect } from 'react';
 import { useAddNewTodo, useDeleteTodo } from './hooks';
+import { Search } from './components/search/search';
+import { Sorting } from './components/sorting/sorting';
 
 export const App = () => {
 	const [todoList, setTodoList] = useState([]);
@@ -11,8 +13,7 @@ export const App = () => {
 	const [buttonAddAndUpdate, setButtonAddAndUpdate] =
 		useState('Добавить');
 	const [byId, setById] = useState('');
-	const [searchValue, setSearchValue] = useState('');
-	const [resultSearch, setResultSearch] = useState([]);
+
 	const [sorted, setSorted] = useState([]);
 
 	const refreshTodo = () =>
@@ -75,33 +76,6 @@ export const App = () => {
 		}
 	};
 
-	const searchTodo = (e) => {
-		e.preventDefault();
-		const searchTodoList = todoList.filter((item) => {
-			return item.todo
-				.toLowerCase()
-				.includes(String(searchValue).toLowerCase());
-		});
-		console.log(searchTodoList);
-		if (searchTodoList) {
-			return setResultSearch(searchTodoList);
-		}
-	};
-
-	const buttonSorting = () => {
-		let sortetTodo = [...todoList];
-		sortetTodo.sort((a, b) => {
-			if (a.todo.toLowerCase() < b.todo.toLowerCase()) {
-				return -1;
-			}
-			if (a.todo.toLowerCase() > b.todo.toLowerCase()) {
-				return 1;
-			}
-			return 0;
-		});
-		setSorted(sortetTodo);
-	};
-
 	return (
 		<div className={styles.app}>
 			<h1 className={styles.todoTitle}>Список дел</h1>
@@ -123,12 +97,8 @@ export const App = () => {
 					{buttonAddAndUpdate}
 				</button>
 			</div>
-			<button
-				className={styles.btnSorting}
-				onClick={buttonSorting}
-			>
-				Сортировка по алфавиту
-			</button>
+			<Sorting todoList={todoList} setSorted={setSorted} />
+
 			<div className={styles.todoList}>
 				{sorted.map(({ id, todo }) => (
 					<div key={id} className={styles.todoTask}>
@@ -161,29 +131,7 @@ export const App = () => {
 					</div>
 				))}
 			</div>
-			<form id="search">
-				<input
-					className={styles.search}
-					type="search"
-					name="search"
-					placeholder="найти..."
-					value={searchValue}
-					onChange={({ target }) =>
-						setSearchValue(target.value)
-					}
-				></input>
-				<button
-					className={styles.btnSearch}
-					onClick={searchTodo}
-				>
-					Поиск
-				</button>
-				{resultSearch.map(({ id, todo }) => (
-					<li className={styles.todoList} key={id}>
-						{todo}
-					</li>
-				))}
-			</form>
+			<Search todoList={todoList} />
 		</div>
 	);
 };

@@ -1,0 +1,23 @@
+.search {
+	margin: 0;
+	border: 1 solid grey;
+	border-radius: 6px;
+	width: 50%;
+	padding: 5px;
+	font-size: 16px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.btnSearch {
+	padding: 4px;
+	width: 20%;
+	background: #e9d2bd;
+	color: #555;
+	text-align: center;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 6px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}

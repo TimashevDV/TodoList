@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useAddNewTodo, useDeleteTodo } from './hooks';
 import { Search } from './components/search/search';
 import { Sorting } from './components/sorting/sorting';
+import { AppContext } from './context';
 
 export const App = () => {
 	const [todoList, setTodoList] = useState([]);
@@ -13,7 +14,6 @@ export const App = () => {
 	const [buttonAddAndUpdate, setButtonAddAndUpdate] =
 		useState('Добавить');
 	const [byId, setById] = useState('');
-
 	const [sorted, setSorted] = useState([]);
 
 	const refreshTodo = () =>
@@ -77,61 +77,73 @@ export const App = () => {
 	};
 
 	return (
-		<div className={styles.app}>
-			<h1 className={styles.todoTitle}>Список дел</h1>
-			<div className={styles.todoNew}>
-				<input
-					placeholder="Новая задача..."
-					className={styles.input}
-					type="text"
-					value={value}
-					onChange={({ target }) =>
-						setValue(target.value)
-					}
-				></input>
+		<AppContext.Provider value={{ todoList }}>
+			<div className={styles.app}>
+				<h1 className={styles.todoTitle}>Список дел</h1>
+				<div className={styles.todoNew}>
+					<input
+						placeholder="Новая задача..."
+						className={styles.input}
+						type="text"
+						value={value}
+						onChange={({ target }) =>
+							setValue(target.value)
+						}
+					></input>
 
-				<button
-					className={styles.btnAdd}
-					onClick={buttonUpdate}
-				>
-					{buttonAddAndUpdate}
-				</button>
-			</div>
-			<Sorting todoList={todoList} setSorted={setSorted} />
+					<button
+						className={styles.btnAdd}
+						onClick={buttonUpdate}
+					>
+						{buttonAddAndUpdate}
+					</button>
+				</div>
+				<Sorting
+					todoList={todoList}
+					setSorted={setSorted}
+				/>
 
-			<div className={styles.todoList}>
-				{sorted.map(({ id, todo }) => (
-					<div key={id} className={styles.todoTask}>
-						<li
+				<div className={styles.todoList}>
+					{sorted.map(({ id, todo }) => (
+						<div
 							key={id}
-							className={styles.todoTaskText}
+							className={styles.todoTask}
 						>
-							<input
+							<li
 								key={id}
-								className={styles.todoCheckBox}
-								type="checkbox"
-							/>
-							{todo}
+								className={styles.todoTaskText}
+							>
+								<input
+									key={id}
+									className={
+										styles.todoCheckBox
+									}
+									type="checkbox"
+								/>
+								{todo}
 
-							<button
-								className={styles.btnDelete}
-								onClick={() => deleteTodo(id)}
-							>
-								X
-							</button>
-							<button
-								className={styles.btnChange}
-								onClick={() =>
-									updateTodo(todo, id)
-								}
-							>
-								R
-							</button>
-						</li>
-					</div>
-				))}
+								<button
+									className={styles.btnDelete}
+									onClick={() =>
+										deleteTodo(id)
+									}
+								>
+									X
+								</button>
+								<button
+									className={styles.btnChange}
+									onClick={() =>
+										updateTodo(todo, id)
+									}
+								>
+									R
+								</button>
+							</li>
+						</div>
+					))}
+				</div>
+				<Search todoList={todoList} />
 			</div>
-			<Search todoList={todoList} />
-		</div>
+		</AppContext.Provider>
 	);
 };

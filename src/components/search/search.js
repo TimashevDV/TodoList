@@ -1,7 +1,10 @@
+import { useContext } from 'react';
 import styles from './search.module.css';
 import { useState } from 'react';
+import { AppContext } from '../../context';
 
-export const Search = ({ todoList }) => {
+export const Search = () => {
+	const { todoList } = useContext(AppContext);
 	const [searchValue, setSearchValue] = useState('');
 	const [resultSearch, setResultSearch] = useState([]);
 

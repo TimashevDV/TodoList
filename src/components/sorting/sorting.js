@@ -1,6 +1,10 @@
+import { AppContext } from '../../context';
 import styles from './sorting.module.css';
+import { useContext } from 'react';
 
-export const Sorting = ({ todoList, setSorted }) => {
+export const Sorting = ({ setSorted }) => {
+	const { todoList } = useContext(AppContext);
+	console.log(todoList);
 	const buttonSorting = () => {
 		let sortetTodo = [...todoList];
 		sortetTodo.sort((a, b) => {
